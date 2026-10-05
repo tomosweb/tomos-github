@@ -4,7 +4,7 @@ folder: "news"
 draft: false
 ---
 
-# Tomos Workspaceから投稿2
+# Tomos Workspaceから投稿3
 
 ファイル名を修正版の投稿になります。
 
