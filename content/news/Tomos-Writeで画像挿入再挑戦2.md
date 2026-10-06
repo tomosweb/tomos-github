@@ -15,5 +15,6 @@ tomos_github_document_id: 4614e373-673c-46df-8d94-2a70b32accbc
 
 今日のことを書きます。
 
-![IMG_6170](files/article-e24651d99eb3/tms-daef667e59705201.jpg)
-これは再挑戦の2回目
+これは再挑戦の3回目
+
+画像削除投稿
