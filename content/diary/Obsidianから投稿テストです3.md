@@ -1,5 +1,5 @@
 ---
-title: Obsidianから投稿テストです1
+title: Obsidianから投稿テストです3
 folder: diary
 date: 2026-10-06
 draft: false
