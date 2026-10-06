@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout site
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -52,6 +54,12 @@ jobs:
       - name: Run Static Build contract
         shell: bash
         run: php "$TOMOS_ROOT/tests/static_site_builder_check.php"
+
+      - name: Verify publication metadata fallback
+        run: python3 scripts/test-publication-metadata.py
+
+      - name: Prepare missing publication metadata from Git history
+        run: python3 scripts/prepare-publication-metadata.py --content-root content --timezone Asia/Tokyo
 
       - name: Build static site
         shell: bash
