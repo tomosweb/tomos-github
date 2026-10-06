@@ -28,7 +28,8 @@ class PublicationMetadataTest(unittest.TestCase):
             renamed = content / 'renamed.md'
             git('mv', 'content/日本語.md', 'content/renamed.md')
             git('commit', '-m', 'rename', time='2026-10-06T02:00:00+00:00')
-            renamed.write_text(renamed.read_text() + 'Update\n')
+            # Reproduce an older undated first post, then a fixed client stamping its update.
+            renamed.write_text(metadata.set_scalar(renamed.read_text() + 'Update\n', 'published', '2026-10-06T05:39:05+00:00'))
             explicit = content / 'explicit.md'
             explicit.write_bytes(b'---\r\ndate: "2020-01-02" # keep\r\npublished: 2020-01-02T01:00:00+09:00\r\n---\r\nBody\r\n')
             draft = content / 'draft.md'; draft.write_text('---\ndraft: true\n---\nDraft\n')

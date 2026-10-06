@@ -76,21 +76,24 @@ def prepare(root, timezone):
             continue
         date = scalar(source, 'date')
         published = scalar(source, 'published')
-        if valid_date(date) and valid_published(published):
-            continue
         # --follow preserves initial publication across a detected rename.
         history = subprocess.check_output(['git', '-C', str(repo), 'log', '--follow', '--format=%aI', '--diff-filter=A', '--', relative], text=True).splitlines()
         if not history:
             raise RuntimeError(f'No initial publication commit found: {relative}')
         initial = dt.datetime.fromisoformat(history[-1])
         updated = source
-        if not valid_published(published):
+        # A client may first stamp an undated article on a later update.
+        # Its initial Git publication is the upper bound of the first-publication time.
+        stamped = dt.datetime.fromisoformat(published.replace('Z', '+00:00')) if valid_published(published) else None
+        if stamped is None or stamped > initial:
             published = initial.astimezone(dt.timezone.utc).isoformat(timespec='seconds')
             updated = set_scalar(updated, 'published', published)
         if not valid_date(date):
             # Explicit initial publication time, if present, is authoritative.
             local = dt.datetime.fromisoformat(published.replace('Z', '+00:00')).astimezone(timezone)
             updated = set_scalar(updated, 'date', local.date().isoformat())
+        if updated == source:
+            continue
         with path.open('w', encoding='utf-8', newline='') as handle:
             handle.write(updated)
         count += 1
