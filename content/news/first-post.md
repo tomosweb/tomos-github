@@ -6,6 +6,7 @@ tags:
   - github
   - tomos
 draft: false
+published: 2026-10-05T06:50:09+00:00
 ---
 
 ## GitHub Pagesで公開する
