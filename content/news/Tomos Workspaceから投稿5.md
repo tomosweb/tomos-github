@@ -2,6 +2,8 @@
 title: "Tomos Workspaceから投稿5"
 folder: "news"
 draft: false
+date: 2026-10-05
+published: 2026-10-05T09:18:01+00:00
 ---
 
 # Tomos Workspaceから投稿5
