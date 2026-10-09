@@ -70,8 +70,12 @@ jobs:
           ' "$GITHUB_WORKSPACE/themes/$custom_name/theme.json"
           php -r '
             $source = file_get_contents($argv[1]);
-            $modified = str_replace("\x27tomos-minimal\x27", "\x27ci-custom-theme\x27", $source);
-            if ($modified === $source) { throw new RuntimeException("Fixture theme replacement failed"); }
+            $config = require $argv[1];
+            $currentTheme = $config["theme"]["name"] ?? null;
+            if (!is_string($currentTheme) || $currentTheme === "") { throw new RuntimeException("Missing theme name"); }
+            $needle = "\x27name\x27 => " . var_export($currentTheme, true);
+            $modified = str_replace($needle, "\x27name\x27 => \x27ci-custom-theme\x27", $source, $count);
+            if ($count !== 1) { throw new RuntimeException("Fixture theme replacement failed"); }
             file_put_contents($argv[2], $modified);
           ' "$GITHUB_WORKSPACE/tomos.config.php" "$GITHUB_WORKSPACE/tomos.ci.config.php"
           php "$TOMOS_ROOT/tools/build-static-site.php" \
