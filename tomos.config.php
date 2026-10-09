@@ -14,7 +14,7 @@ return [
         'language' => 'ja',
     ],
     'theme' => [
-        'name' => 'tomos-minimal',
+        'name' => 'tomos-quiet',
     ],
     'paths' => [
         'content_dir' => __DIR__ . '/content',
