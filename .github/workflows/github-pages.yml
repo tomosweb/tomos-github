@@ -17,7 +17,7 @@ permissions:
 env:
   # Phase 5 merge baseline. Update deliberately to a compatible Tomos tag
   # when one is released.
-  TOMOS_VERSION: 13e6d8f4634e687ae774a0e3a6d483f6a095b832
+  TOMOS_VERSION: 5b92b99114d719c083040b4af77f547da9987b32
   TOMOS_REPOSITORY: https://github.com/tomosweb/tomos.git
   OUTPUT_DIR: build/tomos-github-pages
 
