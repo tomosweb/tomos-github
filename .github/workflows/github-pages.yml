@@ -17,7 +17,7 @@ permissions:
 env:
   # Phase 5 merge baseline. Update deliberately to a compatible Tomos tag
   # when one is released.
-  TOMOS_VERSION: 13e6d8f4634e687ae774a0e3a6d483f6a095b832
+  TOMOS_VERSION: 5b92b99114d719c083040b4af77f547da9987b32
   TOMOS_REPOSITORY: https://github.com/tomosweb/tomos.git
   OUTPUT_DIR: build/tomos-github-pages
 
@@ -53,6 +53,36 @@ jobs:
         shell: bash
         run: php "$TOMOS_ROOT/tests/static_site_builder_check.php"
 
+      - name: Verify site-local theme static build
+        shell: bash
+        run: |
+          set -euo pipefail
+          custom_name="ci-custom-theme"
+          mkdir -p "$GITHUB_WORKSPACE/themes" "$GITHUB_WORKSPACE/assets"
+          cp "$TOMOS_ROOT/assets/tomos-static-search.js" "$GITHUB_WORKSPACE/assets/tomos-static-search.js"
+          cp -R "$TOMOS_ROOT/themes/tomos-minimal" "$GITHUB_WORKSPACE/themes/$custom_name"
+          php -r '
+            $p = $argv[1];
+            $theme = json_decode(file_get_contents($p), true);
+            if (!is_array($theme)) { throw new RuntimeException("Invalid fixture theme"); }
+            $theme["name"] = "ci-custom-theme";
+            file_put_contents($p, json_encode($theme, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+          ' "$GITHUB_WORKSPACE/themes/$custom_name/theme.json"
+          php -r '
+            $source = file_get_contents($argv[1]);
+            $modified = str_replace("\x27tomos-minimal\x27", "\x27ci-custom-theme\x27", $source);
+            if ($modified === $source) { throw new RuntimeException("Fixture theme replacement failed"); }
+            file_put_contents($argv[2], $modified);
+          ' "$GITHUB_WORKSPACE/tomos.config.php" "$GITHUB_WORKSPACE/tomos.ci.config.php"
+          php "$TOMOS_ROOT/tools/build-static-site.php" \
+            --config="$GITHUB_WORKSPACE/tomos.ci.config.php" \
+            --tomos-root="$TOMOS_ROOT" \
+            --output="$RUNNER_TEMP/tomos-custom-theme-build"
+          test -f "$RUNNER_TEMP/tomos-custom-theme-build/themes/$custom_name/assets/style.css"
+          test -f "$RUNNER_TEMP/tomos-custom-theme-build/index.html"
+          rm -f "$GITHUB_WORKSPACE/tomos.ci.config.php"
+          rm -rf "$GITHUB_WORKSPACE/themes/$custom_name"
+
       - name: Build static site
         shell: bash
         run: |
@@ -77,7 +107,13 @@ jobs:
           test -f "$OUTPUT_DIR/sitemap.xml"
           test -f "$OUTPUT_DIR/robots.txt"
           test -f "$OUTPUT_DIR/assets/tomos-static-search.js"
-          test -f "$OUTPUT_DIR/themes/tomos-minimal/assets/style.css"
+          # Verify the configured theme instead of assuming tomos-minimal.
+          selected_theme="$(php -r '$c = require $argv[1]; echo $c["theme"]["name"] ?? "";' "$GITHUB_WORKSPACE/tomos.config.php")"
+          if [[ ! "$selected_theme" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]]; then
+            echo "Invalid configured theme name" >&2
+            exit 1
+          fi
+          test -f "$OUTPUT_DIR/themes/$selected_theme/assets/style.css"
           test -f "$OUTPUT_DIR/content/assets/example.txt"
           test -f "$OUTPUT_DIR/日本語記事/index.html"
           test -f "$OUTPUT_DIR/news/first-post/index.html"
