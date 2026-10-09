@@ -58,6 +58,8 @@ jobs:
         run: |
           set -euo pipefail
           custom_name="ci-custom-theme"
+          mkdir -p "$GITHUB_WORKSPACE/themes" "$GITHUB_WORKSPACE/assets"
+          cp "$TOMOS_ROOT/assets/tomos-static-search.js" "$GITHUB_WORKSPACE/assets/tomos-static-search.js"
           cp -R "$TOMOS_ROOT/themes/tomos-minimal" "$GITHUB_WORKSPACE/themes/$custom_name"
           php -r '
             $p = $argv[1];
