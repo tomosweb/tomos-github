@@ -77,7 +77,13 @@ jobs:
           test -f "$OUTPUT_DIR/sitemap.xml"
           test -f "$OUTPUT_DIR/robots.txt"
           test -f "$OUTPUT_DIR/assets/tomos-static-search.js"
-          test -f "$OUTPUT_DIR/themes/tomos-minimal/assets/style.css"
+          # Verify the configured theme instead of assuming tomos-minimal.
+          selected_theme="$(php -r '$c = require $argv[1]; echo $c["theme"]["name"] ?? "";' "$GITHUB_WORKSPACE/tomos.config.php")"
+          if [[ ! "$selected_theme" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]]; then
+            echo "Invalid configured theme name" >&2
+            exit 1
+          fi
+          test -f "$OUTPUT_DIR/themes/$selected_theme/assets/style.css"
           test -f "$OUTPUT_DIR/content/assets/example.txt"
           test -f "$OUTPUT_DIR/日本語記事/index.html"
           test -f "$OUTPUT_DIR/news/first-post/index.html"
