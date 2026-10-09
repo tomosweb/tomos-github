@@ -8,8 +8,7 @@ if (!is_string($tomosRoot) || trim($tomosRoot) === '') {
 return [
     'site' => [
         'name' => 'Tomos GitHub版',
-        'description' => 'MarkdownからGitHub Pagesへ公開するTomosサイトです。
-更新確認。',
+        'description' => 'MarkdownからGitHub Pagesへ公開するTomosサイトです。',
         'url' => 'https://tomosweb.github.io',
         'base_path' => '/tomos-github',
         'language' => 'ja',
