@@ -141,6 +141,34 @@ jobs:
           ! grep -F 'Draft' "$OUTPUT_DIR/search-index.json"
           ! grep -F '/draft' "$OUTPUT_DIR/sitemap.xml"
 
+      - name: Verify article OGP overrides site-wide OGP
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$TOMOS_ROOT/theme-assets"
+          # Temporary fixture is only present inside this CI runner.
+          printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jawAAAABJRU5ErkJggg==' | base64 -d > "$TOMOS_ROOT/theme-assets/ogp.png"
+          cat > "$GITHUB_WORKSPACE/content/news/ogp-override-ci.md" <<'EOF'
+          ---
+          title: OGP override CI
+          date: 2026-10-22
+          description: Test article-specific OGP priority.
+          image: https://example.com/article-specific-ogp.png
+          draft: false
+          ---
+
+          Test article OGP.
+          EOF
+          test_output="$RUNNER_TEMP/tomos-ogp-priority-test"
+          php "$TOMOS_ROOT/tools/build-static-site.php" \
+            --config="$GITHUB_WORKSPACE/tomos.config.php" \
+            --tomos-root="$TOMOS_ROOT" \
+            --output="$test_output"
+          test -f "$test_output/theme-assets/ogp.png"
+          grep -F 'property="og:image"' "$test_output/news/first-post/index.html" | grep -F '/theme-assets/ogp.png'
+          grep -F 'property="og:image" content="https://example.com/article-specific-ogp.png"' "$test_output/news/ogp-override-ci/index.html"
+          grep -F 'name="twitter:image" content="https://example.com/article-specific-ogp.png"' "$test_output/news/ogp-override-ci/index.html"
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
