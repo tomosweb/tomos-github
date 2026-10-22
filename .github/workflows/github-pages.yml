@@ -98,7 +98,10 @@ jobs:
           # Keep them inside the site repo; never write them to the Tomos service.
           if [ -d "$GITHUB_WORKSPACE/theme-assets" ]; then
             mkdir -p "$TOMOS_ROOT/theme-assets"
-            find "$GITHUB_WORKSPACE/theme-assets" -maxdepth 1 -type f \\( -name "ogp.png" -o -name "ogp.jpg" -o -name "ogp.webp" -o -name "favicon.png" -o -name "favicon.jpg" -o -name "favicon.webp" \\) -exec cp {} "$TOMOS_ROOT/theme-assets/" \\;
+            for asset in "$GITHUB_WORKSPACE"/theme-assets/{ogp,favicon}.{png,jpg,webp}; do
+              [ -f "$asset" ] || continue
+              cp "$asset" "$TOMOS_ROOT/theme-assets/"
+            done
           fi
           php "$TOMOS_ROOT/tools/build-static-site.php"             --config="$GITHUB_WORKSPACE/tomos.config.php"             --tomos-root="$TOMOS_ROOT"             --output="$OUTPUT_DIR"
 
